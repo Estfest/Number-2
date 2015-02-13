@@ -70,7 +70,7 @@ point get_values (string s){
 	TempS = s.substr(0);
 	tempZ = atof(TempS.c_str());
 
-	point p;	p.x = tempX;	p.y = tempY;	p.z = tempZ;
+	point p;	p.x = tempX;	p.y = tempY;	p.points[2] = tempZ;
 
 	return p;
 };
@@ -152,7 +152,7 @@ void printPoints(	std::list<point, std::allocator<point> > s ){ // Prints List o
 	list<point>::const_iterator i;
 
 	for( i = s.begin(); i != s.end(); ++i){ // For every point in the list (For the iterator not equaling the end of list, increment)
-		cout << i->x << " " << i->y << " " << std::fixed << i->z << endl; // Print to console the X , Y ,Z points to full digits.
+		cout << i->x << " " << i->y << " " << std::fixed << i->points[2] << endl; // Print to console the X , Y ,Z points to full digits.
 	}
 	cout << endl;
 };
@@ -181,7 +181,7 @@ void printGroups(std::list<std::list<point, std::allocator<point> > > g){ // Pri
 	  for( i = g.begin(); i != g.end(); ++i)
 	  	  {
 		  for( p = i->begin(); p != i->end(); ++p){
-		  				GroupFile << std::fixed << p->x << "," << p->y << "," << p->z << "  " << p->IsPlate << endl;
+		  				GroupFile << std::fixed << p->x << "," << p->y << "," << p->points[2] << "  " << p->IsPlate << endl;
 		  				//cout << i->Type << i->FNumb << "| " << std::fixed << i->Hight <<" | " << i->HightDiff << " | " << i->thickness << endl;
 		  			}
 		GroupFile << "Next Group" << endl;
@@ -197,13 +197,13 @@ std::list<feature> find_thickness (std::list<std::list<point, std::allocator<poi
 {
 				feature TempFeature;
 				TempFeature.thickness = (i->front().y - i->back().y );
-				if (TempFeature.thickness > 400 && i->front().z != 0){		// Greater than 300
+				if (TempFeature.thickness > 400 && i->front().points[2] != 0){		// Greater than 300
 					TempFeature.Type = 'O'; // Other
 					TempFeature.Hight = find_max(i);
-				}else if (TempFeature.thickness >= 200 && i->front().z != 0 /*&& i->front().IsPlate*/){         // Greater than 100, Z != 0
+				}else if (TempFeature.thickness >= 200 && i->front().points[2] != 0 /*&& i->front().IsPlate*/){         // Greater than 100, Z != 0
 					TempFeature.Type = 'P'; // Plate
 					TempFeature.Hight = find_max(i);
-				}else if (TempFeature.thickness < 200 && i->front().z != 0) { // Less than or Equal to 100, Z != 0
+				}else if (TempFeature.thickness < 200 && i->front().points[2] != 0) { // Less than or Equal to 100, Z != 0
 					TempFeature.Type = 'F';// Frame
 					TempFeature.Hight = find_max(i);
 				}else{															//Neither
@@ -244,10 +244,10 @@ return Features;
 }
 double find_max(std::list<std::list<point> >::const_iterator s){ // Finds the Maximum Z Coord in the group
 		list<point>::const_iterator i;
-		double largest = s->begin()->z; // assign the first value
+		double largest = s->begin()->points[2]; // assign the first value
 		for( i = s->begin(); i != s->end(); ++i){
-	    if (i->z > largest) {
-	      largest= i->z;
+	    if (i->points[2] > largest) {
+	      largest= i->points[2];
 	    }
 		}
 		return largest;
@@ -267,7 +267,7 @@ for ( i = s.begin(); i != s.end();) // For every Point in the list
 	std::list<point> TempSubList;
 	TempSubList.push_back(*i); // Pn
 	i++;						//P(n+1)
-	while(Compare(i->z , TempSubList.back().z)) // Add points to the TempList until an edge is found
+	while(Compare(i->points[2] , TempSubList.back().points[2])) // Add points to the TempList until an edge is found
 		{
 		TempSubList.push_back(*i);				// Push Pn+1
 		i++;
@@ -281,7 +281,7 @@ return Groups; // Return the List of Groups.
 std::list<std::list<point, std::allocator<point> > > combinePlates(std::list<std::list<point, std::allocator<point> > > g) { // Takes in the list of groups and removes Plate gaps
 	list<list<point> >::iterator i;
 	for( i = g.begin(); i != g.end(); ++i){ //for every Node in Groups
-		if ((i->size() <= 4 && i->front().z == 0 && i->back().z == 0 && i->back().y != 0 ) ){ // if the group has 3 or less points and the first point z = 0
+		if ((i->size() <= 4 && i->front().points[2] == 0 && i->back().points[2] == 0 && i->back().points[1] != 0 ) ){ // if the group has 3 or less points and the first point z = 0
 			list<list<point> >::iterator  n,p,m;
 			p._M_node = i._M_node->_M_prev;
 			n._M_node = i._M_node->_M_next;
